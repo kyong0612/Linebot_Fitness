@@ -1,9 +1,13 @@
 import json
 import os
-# import requests
+import requests
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (LineBotApiError, InvalidSignatureError)
 from linebot.models import (MessageEvent, TextMessage, TextSendMessage,)
+
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 def lambda_handler(event, context):
@@ -21,13 +25,22 @@ def lambda_handler(event, context):
     signature = event["headers"]['x-line-signature']
     # get request body as text
     body = event["body"]
-    print("Request body: " + body)
+    print("Webhook Request body: " + body)
 
-    @handler.add(MessageEvent, message=TextMessage)
-    def message(line_event):
-        text = line_event.message.text
-        line_bot_api.reply_message(
-            line_event.reply_token, TextSendMessage(text=text))
+    # add handler method
+    @handler.add(MessageEvent)
+    def text_message(line_event):
+        if (line_event.message.type == 'image'):
+            print("画像を受信")
+            message_id = line_event.message.id
+            message_content = line_bot_api.get_message_content(message_id)
+            with open(file_path, 'wb') as fd:
+                for chunk in message_content.iter_content():
+                    fd.write(chunk)
+        else:
+            text = f'「{line_event.message.text}」\n画像を送信してね'
+            line_bot_api.reply_message(
+                line_event.reply_token, TextSendMessage(text=text))
 
     try:
         handler.handle(body, signature)
@@ -35,8 +48,35 @@ def lambda_handler(event, context):
         logger.error("Got exception from LINE Messaging API: %s\n" % e.message)
         for m in e.error.details:
             logger.error("  %s: %s" % (m.property, m.message))
-        # return error_json
     except InvalidSignatureError:
         logger.error("sending message happen error")
-        # return error_json
-    # return ok_json
+
+
+# Google Driveに保存
+def uploadFileToGoogleDrive():
+    print("start upload to Google Drive")
+    try:
+        # ext = os.path.splitext(localFilePath.lower())[1][1:]
+        # if ext == "jpg":
+        #     ext = "jpeg"
+        # mimeType = "image/" + ext
+
+        service = getGoogleService()
+        file_metadata = {"name": fileName, "mimeType": mimeType,
+                         "parents": ["1P4of3548yOXKgygy2a-FwIkIN8Qx3yvr"]}
+        media = MediaFileUpload(
+            localFilePath, mimetype=mimeType, resumable=True)
+        file = service.files().create(body=file_metadata,
+                                      media_body=media, fields='id').execute()
+
+    except Exception as e:
+        logger.exception(e)
+
+
+def getGoogleService():
+    scope = ['https://www.googleapis.com/upload/drive/v3/files']
+    keyFile = 'linebot-304913-1e5bdbc415f8.json'
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        keyFile, scopes=scope)
+    return build("drive", "v3", credentials=credentials, cache_discovery=False)
