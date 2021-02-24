@@ -241,4 +241,8 @@ $RECYCLE.BIN/
 
 */build/*
 
+#APIkey
+credentials.json
+googleDriveSecretKey.json
+
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
