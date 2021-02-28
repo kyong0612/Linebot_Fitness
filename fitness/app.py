@@ -15,8 +15,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from oauth2client.service_account import ServiceAccountCredentials
 
-logger = logging.getLogger()
 
+logger = logging.getLogger()
 
 def lambda_handler(event, context):
 
@@ -68,34 +68,33 @@ def lambda_handler(event, context):
     except InvalidSignatureError:
         logger.error("sending message happen error")
     except Exception as e:
-        logger.error(e)
+        print(e)
 
 
 # Google Driveに保存
 def uploadFileToGoogleDrive(file_name):
-    print("start upload to Google Drive")
     try:
         mimeType = "image/jpeg"
         fileName = datetime.datetime.now(
             datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y/%m/%d_%H:%M:%S')
 
-        # print("googleSeviceインスタンス化")
         service = getGoogleService()
         body = {"name": fileName, "mimeType": mimeType,
                 "parents": ["1P4of3548yOXKgygy2a-FwIkIN8Qx3yvr"]}
 
         media_body = MediaFileUpload(
-            file_name,  mimetype=mimeType, resumable=True)
+            file_name, mimetype=mimeType, resumable=True)
 
+        # ここで処理が終わる
         file = service.files().create(body=body,
                                       media_body=media_body, fields='id').execute()
 
     except Exception as e:
-        logger.exception(e)
+        print(e)
 
 
 def getGoogleService():
-    print("start create googleAPI service")
+    print("START CREATE GOOGLE CREDENTIALS")
     SCOPES = ['https://www.googleapis.com/auth/drive.file']
     keyFile = 'googleDriveSecretKey.json'
 
