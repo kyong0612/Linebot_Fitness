@@ -2,7 +2,7 @@
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
-- hello_world - Code for the application's Lambda function.
+- fitness - Code for the application's Lambda function.
 - events - Invocation events that you can use to invoke the function.
 - tests - Unit tests for the application code.
 - template.yaml - A template that defines the application's AWS resources.
@@ -16,6 +16,18 @@ The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI
 - [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
 - [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
 - [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+
+## Create GoogleDriveAPI SecretKey file
+
+- file name is `googleDriveSecretKey.json`
+```
+├── fitness
+│   ├── __init__.py
+│   ├── app.py
+│   ├── googleDriveSecretKey.json
+│   └── requirements.txt
+```
+
 
 ## Deploy the sample application
 
@@ -52,7 +64,7 @@ Build your application with the `sam build --use-container` command.
 LINEbot_Fitness$ sam build --use-container
 ```
 
-The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+The SAM CLI installs dependencies defined in `fitness/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
